@@ -47,5 +47,9 @@ async def clear_chat():
     chat_logs = initial_chat_log.copy()  # copy() to make sure they're separate lists in memory
     return {"status": "Chat history cleared"}
 
+@app.get("/get_chat_logs")
+async def get_chat_logs():
+    return {"chat_logs": chat_logs}
+
 def generate_prompt(user_prompt: str) -> str:
     return user_prompt.capitalize()
