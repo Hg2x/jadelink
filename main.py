@@ -1,9 +1,10 @@
 # uvicorn main:app --reload
 import os
 import openai
+from typing import List
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 app = FastAPI()
 ALLOWED_ORIGINS = "http://localhost:3000/";
@@ -25,8 +26,30 @@ openai.api_key = OPENAI_API_KEY
 class Prompt(BaseModel):
     user_prompt: str
 
+class Message(BaseModel):
+    role: str
+    content: str
+
+class Choice(BaseModel):
+    index: int
+    message: Message
+    finish_reason: str
+
+class Usage(BaseModel):
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+class Response(BaseModel): # non-streamed response
+    id: str
+    object: str
+    created: int
+    model: str
+    choices: List[Choice]
+    usage: Usage
+
 initial_chat_log = [{"role": "system", "content": "You are a helpful assistant."}]
-chat_logs = initial_chat_log # TODO: still global, consider using database/session storage
+chat_logs = initial_chat_log.copy() # TODO: still global, consider using database/session storage
 
 @app.post("/")
 async def generate_reply(prompt: Prompt):
@@ -41,7 +64,9 @@ async def generate_reply(prompt: Prompt):
             model="gpt-3.5-turbo",
             messages=chat_logs
         )
-        generated_result = response['choices'][0]['message']['content'].strip()
+        validated_response = Response.parse_obj(response)
+        generated_result = validated_response.choices[0].message.content.strip()
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error interacting with OpenAI API.")
 
@@ -63,4 +88,3 @@ async def get_chat_logs():
 
 def generate_prompt(user_prompt: str) -> str:
     return user_prompt.capitalize()  # TODO: add more validation/sanitization here
-
