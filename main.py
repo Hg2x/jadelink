@@ -13,7 +13,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[ALLOWED_ORIGINS],
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -51,7 +51,7 @@ class Response(BaseModel): # non-streamed response
 initial_chat_log = [{"role": "system", "content": "You are a helpful assistant."}]
 chat_logs = initial_chat_log.copy() # TODO: still global, consider using database/session storage
 
-@app.post("/")
+@app.post("/generate_reply")
 async def generate_reply(prompt: Prompt):
     user_input = generate_prompt(prompt.user_prompt)
     chat_logs.append({
@@ -76,13 +76,14 @@ async def generate_reply(prompt: Prompt):
     })
     return {"generated_result": generated_result, "chat_logs": chat_logs}
 
-@app.post("/clear_chat")
+@app.delete("/chat_logs")
 async def clear_chat():
     global chat_logs
     chat_logs = initial_chat_log.copy()  # copy() to make sure they're separate lists in memory
     return {"status": "Chat history cleared"}
 
-@app.get("/get_chat_logs")
+
+@app.get("/chat_logs")
 async def get_chat_logs():
     return {"chat_logs": chat_logs}
 
