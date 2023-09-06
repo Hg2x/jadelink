@@ -4,7 +4,7 @@ import openai
 from typing import List
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 app = FastAPI()
 ALLOWED_ORIGINS = "http://localhost:3000/";
@@ -75,7 +75,7 @@ async def generate_reply(prompt: Prompt):
         "role": "assistant",
         "content": generated_result
     })
-    return {"generated_result": generated_result, "chat_logs": chat_logs, "prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens}
+    return {"chat_logs": chat_logs, "prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens}
 
 @app.delete("/chat_logs")
 async def clear_chat():
