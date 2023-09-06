@@ -66,7 +66,8 @@ async def generate_reply(prompt: Prompt):
         )
         validated_response = Response.parse_obj(response)
         generated_result = validated_response.choices[0].message.content.strip()
-        
+        prompt_tokens = validated_response.usage.prompt_tokens
+        completion_tokens = validated_response.usage.completion_tokens 
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error interacting with OpenAI API.")
 
@@ -74,7 +75,7 @@ async def generate_reply(prompt: Prompt):
         "role": "assistant",
         "content": generated_result
     })
-    return {"generated_result": generated_result, "chat_logs": chat_logs}
+    return {"generated_result": generated_result, "chat_logs": chat_logs, "prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens}
 
 @app.delete("/chat_logs")
 async def clear_chat():
