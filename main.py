@@ -25,6 +25,7 @@ openai.api_key = OPENAI_API_KEY
 
 class Prompt(BaseModel):
     user_prompt: str
+    model: str
 
 class Message(BaseModel):
     role: str
@@ -61,7 +62,7 @@ async def generate_reply(prompt: Prompt):
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=prompt.model,
             messages=chat_logs
         )
         validated_response = Response.parse_obj(response)
