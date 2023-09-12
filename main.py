@@ -1,4 +1,3 @@
-# uvicorn main:app --reload
 import os
 import openai
 from typing import List
@@ -50,7 +49,7 @@ class Response(BaseModel): # non-streamed response
     usage: Usage
 
 initial_chat_log = [{"role": "system", "content": "You are a helpful assistant."}]
-chat_logs = initial_chat_log.copy() # TODO: still global, consider using database/session storage
+chat_logs = initial_chat_log.copy() # TODO: still global, use database/session storage later
 
 @app.post("/generate_reply")
 async def generate_reply(prompt: Prompt):
